@@ -69,8 +69,11 @@ export default function ProductCard({ product, mode }: { product: Product, mode:
                 const saved = Math.max(0, consumer - product.price)
                 const percent = saved > 0 && consumer > 0 ? Math.round((saved / consumer) * 100) : 0
                 return saved > 0 ? (
-                  <div title={`Hemat Rp ${saved.toLocaleString('id-ID')}`} className="ml-2 bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded">
-                    -{percent}%
+                  <div className="ml-2 flex flex-col items-start gap-0">
+                    <div title={`Hemat Rp ${saved.toLocaleString('id-ID')}`} className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded">
+                      -{percent}%
+                    </div>
+                    <div className="text-xs text-gray-500">Hemat Rp {saved.toLocaleString('id-ID')}</div>
                   </div>
                 ) : null
               })()}
