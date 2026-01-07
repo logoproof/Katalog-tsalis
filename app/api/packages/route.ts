@@ -89,3 +89,61 @@ export async function PUT(request: Request) {
   const pkg = { name: updated.name, skus: (updated.package_items || []).map((pi) => pi.product_id), updated_at: updated.updated_at }
   return NextResponse.json({ package: pkg })
 }
+
+export async function PATCH(request: Request) {
+  // partial update a package; body can be { name, addSkus?: string[], removeSkus?: string[] }
+  const body = await request.json()
+  const { name, addSkus, removeSkus } = body || {}
+
+  const authHeader = request.headers.get('authorization')
+  const token = authHeader?.replace(/^Bearer\s+/i, '')
+  const user = await getUserFromAuthToken(token)
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const is_admin = await isUserAdmin(user.id)
+  if (!is_admin) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+
+  if (!name) {
+    return NextResponse.json({ error: 'name required' }, { status: 400 })
+  }
+
+  // get current package
+  const { data: pkgRow } = await serverClient.from('packages').select('id').eq('name', name).single()
+  if (!pkgRow) return NextResponse.json({ error: 'package not found' }, { status: 404 })
+  const packageId = pkgRow.id
+
+  // get current skus
+  const { data: currentItems } = await serverClient.from('package_items').select('product_id').eq('package_id', packageId).order('position')
+  let currentSkus = (currentItems || []).map((pi: { product_id: string }) => pi.product_id)
+
+  // apply changes
+  if (Array.isArray(addSkus)) {
+    addSkus.forEach((sku: string) => {
+      if (!currentSkus.includes(sku)) {
+        currentSkus.push(sku)
+      }
+    })
+  }
+  if (Array.isArray(removeSkus)) {
+    currentSkus = currentSkus.filter((sku: string) => !removeSkus.includes(sku))
+  }
+
+  // update package_items
+  await serverClient.from('package_items').delete().eq('package_id', packageId)
+  if (currentSkus.length > 0) {
+    const inserts = currentSkus.map((productId: string, i: number) => ({ package_id: packageId, product_id: productId, quantity: 1, position: i }))
+    await serverClient.from('package_items').insert(inserts)
+  }
+
+  // return updated representation
+  const { data: updatedData } = await serverClient
+    .from('packages')
+    .select('name, package_items(product_id), updated_at')
+    .eq('id', packageId)
+    .single()
+
+  type UpdatedRow = { name: string; package_items?: { product_id: string }[]; updated_at?: string }
+  const updated = updatedData as UpdatedRow
+  const pkg = { name: updated.name, skus: (updated.package_items || []).map((pi) => pi.product_id), updated_at: updated.updated_at }
+  return NextResponse.json({ package: pkg })
+}

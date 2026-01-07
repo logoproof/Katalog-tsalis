@@ -11,6 +11,7 @@ interface Product {
   category: string;
   sold_count: number;
   price: number;
+  consumerPrice?: number;
 }
 
 const MODE_MAP: Record<string, { tierName: string; multiplier: number; label: string }> = {
@@ -49,43 +50,50 @@ export default function Home() {
       const { tierName } = MODE_MAP[mode]
       const { data: tierData } = await supabase
         .from('tiers')
-        .select('id')
+        .select('id, name')
         .eq('name', tierName)
         .single();
 
-      if (productsData) {
-        let merged = productsData.map((p) => ({ ...p, price: 0 })) as Product[]
+      // Always fetch consumer tier prices so we can show struck-through consumer price
+      const { data: consumerTier } = await supabase
+        .from('tiers')
+        .select('id')
+        .eq('name', 'Consumer')
+        .single();
 
+      let consumerPrices: { product_id: string; price: number }[] = []
+      if (consumerTier) {
+        const { data: cp } = await supabase
+          .from('product_prices')
+          .select('product_id, price')
+          .eq('tier_id', consumerTier.id);
+        consumerPrices = cp || []
+      }
+
+      if (productsData) {
+        let merged = productsData.map((p) => ({ ...p, price: 0, consumerPrice: 0 })) as Product[]
+
+        // get selected tier prices (if exists and is different from consumer)
+        let tierPrices: { product_id: string; price: number }[] = []
         if (tierData) {
           const { data: pricesData } = await supabase
             .from('product_prices')
             .select('product_id, price')
             .eq('tier_id', tierData.id);
-
-          merged = productsData.map((p) => {
-            const priceInfo = pricesData?.find((pr) => pr.product_id === p.id);
-            return { ...p, price: priceInfo?.price || 0 };
-          });
-        } else {
-          // Fallback to consumer prices if tier not found
-          const { data: consumerTier } = await supabase
-            .from('tiers')
-            .select('id')
-            .eq('name', 'Consumer')
-            .single();
-
-          if (consumerTier) {
-            const { data: pricesData } = await supabase
-              .from('product_prices')
-              .select('product_id, price')
-              .eq('tier_id', consumerTier.id);
-
-            merged = productsData.map((p) => {
-              const priceInfo = pricesData?.find((pr) => pr.product_id === p.id);
-              return { ...p, price: priceInfo?.price || 0 };
-            });
-          }
+          tierPrices = pricesData || []
         }
+
+        merged = productsData.map((p) => {
+          const consumerInfo = consumerPrices.find((pr) => pr.product_id === p.id)
+          const tierInfo = tierPrices.find((pr) => pr.product_id === p.id)
+
+          const consumerPrice = consumerInfo?.price || 0
+          // if mode is consumer use consumerPrice, else prefer tier price if available, otherwise fallback to consumerPrice
+          let activePrice = consumerPrice
+          if (mode !== 'consumer' && tierInfo?.price) activePrice = tierInfo.price
+
+          return { ...p, price: activePrice, consumerPrice }
+        })
 
         setProducts(merged);
       }
