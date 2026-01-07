@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#2563EB" stroke="#1E40AF" stroke-width="2"/>
+  
+  <!-- Letter T in white -->
+  <g fill="white" font-family="Arial, sans-serif" font-size="100" font-weight="bold">
+    <text x="50" y="130" text-anchor="middle">T</text>
+  </g>
+  
+  <!-- Decorative underline -->
+  <line x1="40" y1="145" x2="160" y2="145" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>
