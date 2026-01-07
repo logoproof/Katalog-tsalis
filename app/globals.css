@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Base app styles */
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+button:focus, input:focus, textarea:focus {
+  @apply outline-none ring-2 ring-blue-200;
+}
+
+/* Utility for half-width centered container is handled with Tailwind classes in layout */

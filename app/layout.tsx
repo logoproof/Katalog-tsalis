@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description: 'Katalog produk Tsalis',
 }
 
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import { CartProvider } from '@/context/CartContext'
+
 export default function RootLayout({
   children,
 }: {
@@ -13,7 +17,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
+        <CartProvider>
+          <Header />
+
+          <main className="w-full px-4 py-6 flex justify-center">
+            <div className="w-full max-w-full sm:max-w-xl md:max-w-2xl lg:w-1/2">
+              {children}
+            </div>
+          </main>
+
+          <Footer />
+        </CartProvider>
+      </body>
     </html>
   )
 }
