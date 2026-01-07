@@ -62,7 +62,9 @@ export default function ProductCard({ product, mode }: { product: Product, mode:
             )}
 
             <div className="flex items-center gap-2">
-              <div className="text-blue-600 font-bold">Rp {product.price.toLocaleString('id-ID')}</div>
+              <div className="text-blue-600 font-bold">
+                {product.price > 0 ? `Rp ${product.price.toLocaleString('id-ID')}` : 'Harga: Hubungi Kami'}
+              </div>
 
               {(() => {
                 const consumer = product.consumerPrice ?? 0

@@ -10,6 +10,7 @@ export default function Header() {
     <header className="w-full bg-white border-b border-gray-100">
       <div className="max-w-full sm:max-w-xl md:max-w-2xl lg:w-1/2 mx-auto px-4 py-3 flex items-center gap-4">
         <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo Tsalis" className="h-8 w-8" />
           <div className="text-xl font-extrabold">Katalog <span className="text-blue-600">Tsalis</span></div>
         </div>
 
