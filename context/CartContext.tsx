@@ -13,15 +13,21 @@ type CartContextType = {
   items: CartItem[]
   totalCount: number
   totalPrice: number
+  cartOpen: boolean
+  openCart: () => void
+  closeCart: () => void
+  toggleCart: () => void
   addToCart: (item: { id: string; name: string; price: number; image?: string | null }) => void
   removeFromCart: (id: string) => void
   updateQuantity: (id: string, q: number) => void
+  clearCart: () => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([])
+  const [cartOpen, setCartOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -36,6 +42,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('cart', JSON.stringify(items))
   }, [items])
 
+  const openCart = () => setCartOpen(true)
+  const closeCart = () => setCartOpen(false)
+  const toggleCart = () => setCartOpen((s) => !s)
+
   const addToCart = (item: { id: string; name: string; price: number; image?: string | null }) => {
     setItems((prev) => {
       const idx = prev.findIndex((p) => p.id === item.id)
@@ -44,6 +54,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         copy[idx].quantity += 1
         return copy
       }
+      // open cart when adding
+      setCartOpen(true)
       return [...prev, { ...item, quantity: 1 }]
     })
   }
@@ -53,14 +65,16 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const updateQuantity = (id: string, q: number) => {
-    setItems((prev) => prev.map(p => p.id === id ? { ...p, quantity: q } : p))
+    setItems((prev) => prev.map(p => p.id === id ? { ...p, quantity: Math.max(1, q) } : p))
   }
+
+  const clearCart = () => setItems([])
 
   const totalCount = items.reduce((s, i) => s + i.quantity, 0)
   const totalPrice = items.reduce((s, i) => s + i.price * i.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, totalCount, totalPrice, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider value={{ items, totalCount, totalPrice, cartOpen, openCart, closeCart, toggleCart, addToCart, removeFromCart, updateQuantity, clearCart }}>
       {children}
     </CartContext.Provider>
   )

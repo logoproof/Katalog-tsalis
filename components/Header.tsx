@@ -4,7 +4,7 @@ import { useCart } from '@/context/CartContext'
 
 export default function Header() {
   const [query, setQuery] = useState('')
-  const { totalCount } = useCart()
+  const { totalCount, openCart, cartOpen } = useCart()
 
   return (
     <header className="w-full bg-white border-b border-gray-100">
@@ -29,8 +29,11 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <button
             aria-label="Keranjang"
+            aria-expanded={cartOpen}
+            onClick={openCart}
             className="relative inline-flex items-center rounded-md bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700"
           >
+            <span className="sr-only">Buka keranjang</span>
             Cart
             <span className="ml-2 bg-white text-blue-600 rounded-full px-2 text-xs font-semibold">{totalCount}</span>
           </button>
