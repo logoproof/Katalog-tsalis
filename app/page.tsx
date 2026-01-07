@@ -1,20 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
-import Image from 'next/image';
-
-interface Product {
-  id: string;
-  name: string;
-  image_url: string | null;
-  category: string;
-  sold_count: number;
-  price: number;
-}
-
-'use client';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabaseClient';
 import ProductCard from '@/components/ProductCard';
 
 interface Product {

@@ -9,9 +9,7 @@ export const metadata: Metadata = {
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { CartProvider } from '@/context/CartContext'
-import dynamic from 'next/dynamic'
-
-const CartDrawer = dynamic(() => import('@/components/CartDrawer'), { ssr: false })
+import CartMount from '@/components/CartMount'
 
 export default function RootLayout({
   children,
@@ -33,7 +31,7 @@ export default function RootLayout({
           <Footer />
 
           {/* Cart drawer mounted globally so it can be opened from anywhere */}
-          <CartDrawer />
+          <CartMount />
         </CartProvider>
       </body>
     </html>
