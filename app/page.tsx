@@ -36,6 +36,10 @@ export default function Home() {
   const [mode, setMode] = useState<'consumer'|'dropshipper'|'agen_kecil'|'silver'|'gold'|'platinum'>('consumer')
   const supabase = createClient();
 
+  // debug: expose fetched price tables for verification
+  const [consumerPricesState, setConsumerPricesState] = useState<{ product_id: string; price: number }[]>([])
+  const [tierPricesState, setTierPricesState] = useState<{ product_id: string; price: number }[]>([])
+  const [showPriceDebug, setShowPriceDebug] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -68,6 +72,7 @@ export default function Home() {
           .select('product_id, price')
           .eq('tier_id', consumerTier.id);
         consumerPrices = cp || []
+        setConsumerPricesState(consumerPrices)
       }
 
       if (productsData) {
@@ -81,6 +86,7 @@ export default function Home() {
             .select('product_id, price')
             .eq('tier_id', tierData.id);
           tierPrices = pricesData || []
+          setTierPricesState(tierPrices)
         }
 
         merged = productsData.map((p) => {
@@ -247,6 +253,9 @@ export default function Home() {
               <option value="price_desc">Harga: Tinggi &rarr; Rendah</option>
             </select>
           </div>
+          <div className="ml-4">
+            <button onClick={() => setShowPriceDebug((s) => !s)} className="text-sm px-2 py-1 rounded-md border border-gray-200 text-gray-700">{showPriceDebug ? 'Sembunyikan Debug Harga' : 'Tampilkan Debug Harga'}</button>
+          </div>
         </div>
 
         {agenNotice && (
@@ -373,6 +382,22 @@ export default function Home() {
           {products.map((product) => (
             <ProductCard key={product.id} product={product} mode={mode} />
           ))}
+        </div>
+      )}
+
+      {showPriceDebug && (
+        <div className="mt-6 p-4 bg-white border border-gray-100 rounded text-sm text-gray-700">
+          <h3 className="font-semibold mb-2">Debug Harga (raw)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div className="font-medium">Consumer Prices</div>
+              <pre className="text-xs max-h-48 overflow-auto mt-2">{JSON.stringify(consumerPricesState, null, 2)}</pre>
+            </div>
+            <div>
+              <div className="font-medium">Tier Prices (current mode)</div>
+              <pre className="text-xs max-h-48 overflow-auto mt-2">{JSON.stringify(tierPricesState, null, 2)}</pre>
+            </div>
+          </div>
         </div>
       )}
 
