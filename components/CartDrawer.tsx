@@ -1,5 +1,6 @@
 'use client'
 import { useEffect } from 'react'
+import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
 
 export default function CartDrawer(){
@@ -31,10 +32,10 @@ export default function CartDrawer(){
               <ul className="space-y-4">
                 {items.map(item => (
                   <li key={item.id} className="flex items-center gap-3">
-                    <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex items-center justify-center text-xs text-gray-400">
+                    <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden relative flex items-center justify-center text-xs text-gray-400">
                       {item.image ? (
                         // show small image if available
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" onError={(e)=>{(e.currentTarget as HTMLImageElement).style.display='none'}}/>
+                        <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover" />
                       ) : (
                         <span>No Image</span>
                       )}

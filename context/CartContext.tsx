@@ -17,7 +17,7 @@ type CartContextType = {
   openCart: () => void
   closeCart: () => void
   toggleCart: () => void
-  addToCart: (item: { id: string; name: string; price: number; image?: string | null }) => void
+  addToCart: (item: { id: string; name: string; price: number; image?: string | null }, qty?: number) => void
   removeFromCart: (id: string) => void
   updateQuantity: (id: string, q: number) => void
   clearCart: () => void
@@ -46,17 +46,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const closeCart = () => setCartOpen(false)
   const toggleCart = () => setCartOpen((s) => !s)
 
-  const addToCart = (item: { id: string; name: string; price: number; image?: string | null }) => {
+  const addToCart = (item: { id: string; name: string; price: number; image?: string | null }, qty = 1) => {
     setItems((prev) => {
       const idx = prev.findIndex((p) => p.id === item.id)
       if (idx >= 0) {
         const copy = [...prev]
-        copy[idx].quantity += 1
+        copy[idx].quantity += qty
         return copy
       }
       // open cart when adding
       setCartOpen(true)
-      return [...prev, { ...item, quantity: 1 }]
+      return [...prev, { ...item, quantity: qty }]
     })
   }
 
