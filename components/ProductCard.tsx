@@ -10,6 +10,7 @@ interface Product {
   category: string
   sold_count: number
   price: number
+  consumerPrice?: number
 }
 
 export default function ProductCard({ product, mode }: { product: Product, mode: 'consumer'|'dropshipper'|'agen_kecil'|'silver'|'gold'|'platinum' }) {
@@ -22,6 +23,8 @@ export default function ProductCard({ product, mode }: { product: Product, mode:
 
   // if there is already another product in cart (different id) then agent kecil rules will be invalidated by page logic
   const otherProductExists = items.some(i => i.id !== product.id)
+
+  const showStruckConsumer = typeof product.consumerPrice === 'number' && product.consumerPrice > 0 && product.consumerPrice !== product.price
 
   return (
     <article className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 flex flex-col h-full">
@@ -53,7 +56,27 @@ export default function ProductCard({ product, mode }: { product: Product, mode:
         )}
 
         <div className="mt-auto flex items-center justify-between gap-3">
-          <div className="text-blue-600 font-bold">Rp {product.price.toLocaleString('id-ID')}</div>
+          <div>
+            {showStruckConsumer && (
+              <div className="text-xs text-gray-500 line-through">Rp {product.consumerPrice?.toLocaleString('id-ID')}</div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <div className="text-blue-600 font-bold">Rp {product.price.toLocaleString('id-ID')}</div>
+
+              {(() => {
+                const consumer = product.consumerPrice ?? 0
+                const saved = Math.max(0, consumer - product.price)
+                const percent = saved > 0 && consumer > 0 ? Math.round((saved / consumer) * 100) : 0
+                return saved > 0 ? (
+                  <div title={`Hemat Rp ${saved.toLocaleString('id-ID')}`} className="ml-2 bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded">
+                    -{percent}%
+                  </div>
+                ) : null
+              })()}
+            </div>
+          </div>
+
           <button
             onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image: product.image_url }, qtyToAdd)}
             className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 touch-manipulation"
